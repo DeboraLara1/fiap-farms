@@ -1,0 +1,46 @@
+<app-initializer>
+  <ng-container *ngIf="isLoggedIn; else loginBlock">
+    <div class="app-container">
+      <header class="header">
+        <div class="header-content">
+          <div class="logo">
+            <div class="logo-icon">🌾</div>
+            <h1>FIAP Farms</h1>
+          </div>
+          <nav class="nav">
+            <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+              <span class="nav-icon">📊</span>
+              <span class="nav-text">Dashboard</span>
+            </a>
+            <a routerLink="/estoque" routerLinkActive="active" class="nav-item">
+              <span class="nav-icon">📦</span>
+              <span class="nav-text">Estoque</span>
+            </a>
+            <a routerLink="/metas" routerLinkActive="active" class="nav-item">
+              <span class="nav-icon">🎯</span>
+              <span class="nav-text">Metas</span>
+            </a>
+          </nav>
+        </div>
+        <div class="user-section">
+          <div class="user-menu">
+            <div class="user-info">
+              <div class="user-avatar">👤</div>
+              <span class="user-name">{{ userEmail }}</span>
+            </div>
+            <button class="logout-btn" (click)="logout()">
+              <span class="logout-icon">🚪</span>
+              <span class="logout-text">Sair</span>
+            </button>
+          </div>
+        </div>
+      </header>
+      <main class="main-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </ng-container>
+  <ng-template #loginBlock>
+    <router-outlet></router-outlet>
+  </ng-template>
+</app-initializer>

@@ -1,0 +1,303 @@
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f8f8fa;
+}
+
+.login-container form {
+  background: #fff;
+  padding: 2.5rem 2rem 2rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(34,34,59,0.10);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  min-width: 320px;
+  max-width: 350px;
+}
+
+.login-container h2 {
+  margin-bottom: 1.5rem;
+  color: #22223b;
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.login-container label {
+  font-weight: 500;
+  color: #22223b;
+  margin-bottom: 0.3rem;
+}
+
+.login-container input[type="email"],
+.login-container input[type="password"] {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid #c9c9d1;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #f8f8fa;
+  margin-bottom: 0.5rem;
+  transition: border 0.2s;
+}
+.login-container input[type="email"]:focus,
+.login-container input[type="password"]:focus {
+  border: 1.5px solid #4a4e69;
+  outline: none;
+}
+
+.login-container button[type="submit"] {
+  background: #4a4e69;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+.login-container button[type="submit"]:hover {
+  background: #22223b;
+}
+
+.login-container .success {
+  color: #43e97b;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.login-container .error {
+  color: #f44336;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.login-container a {
+  color: #4a4e69;
+  font-size: 0.95rem;
+  text-align: right;
+  margin-top: 0.2rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.login-container input[type="checkbox"] {
+  accent-color: #4a4e69;
+  margin-right: 0.3rem;
+}
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .login-container form {
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .login-container form {
+    max-width: 380px;
+    padding: 2.2rem 1.8rem 1.8rem 1.8rem;
+  }
+
+  .login-container h2 {
+    font-size: 1.9rem;
+  }
+
+  .login-container p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-container form {
+    min-width: 85vw;
+    max-width: 90vw;
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+  }
+
+  .login-container h2 {
+    font-size: 1.7rem;
+  }
+
+  .login-container p {
+    font-size: 0.95rem;
+  }
+
+  .login-container input[type="email"],
+  .login-container input[type="password"] {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.95rem;
+  }
+
+  .login-container button[type="submit"] {
+    padding: 0.6rem 0;
+    font-size: 1rem;
+  }
+
+  .login-container .success,
+  .login-container .error {
+    font-size: 0.9rem;
+  }
+
+  .login-container a {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .login-container form {
+    min-width: 90vw;
+    max-width: 95vw;
+    padding: 1.8rem 1.2rem 1.2rem 1.2rem;
+  }
+
+  .login-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .login-container p {
+    font-size: 0.9rem;
+  }
+
+  .login-container input[type="email"],
+  .login-container input[type="password"] {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  .login-container button[type="submit"] {
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container form {
+    min-width: 92vw;
+    max-width: 98vw;
+    padding: 1.5rem 1rem 1rem 1rem;
+  }
+
+  .login-container h2 {
+    font-size: 1.3rem;
+  }
+
+  .login-container p {
+    font-size: 0.85rem;
+  }
+
+  .login-container input[type="email"],
+  .login-container input[type="password"] {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .login-container button[type="submit"] {
+    padding: 0.4rem 0;
+    font-size: 0.9rem;
+  }
+
+  .login-container .success,
+  .login-container .error {
+    font-size: 0.85rem;
+  }
+
+  .login-container a {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-container form {
+    min-width: 95vw;
+    max-width: 99vw;
+    padding: 1.2rem 0.8rem 0.8rem 0.8rem;
+  }
+
+  .login-container h2 {
+    font-size: 1.2rem;
+  }
+
+  .login-container p {
+    font-size: 0.8rem;
+  }
+
+  .login-container input[type="email"],
+  .login-container input[type="password"] {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .login-container button[type="submit"] {
+    padding: 0.35rem 0;
+    font-size: 0.85rem;
+  }
+
+  .login-container .success,
+  .login-container .error {
+    font-size: 0.8rem;
+  }
+
+  .login-container a {
+    font-size: 0.8rem;
+  }
+}
+
+/* Orientação landscape em mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .login-container {
+    padding: 1rem;
+  }
+
+  .login-container form {
+    padding: 1.5rem 2rem 1rem 2rem;
+  }
+
+  .login-container h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .login-container p {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Telas de alta resolução */
+@media (min-width: 1400px) {
+  .login-container form {
+    max-width: 450px;
+    padding: 3rem 2.5rem 2.5rem 2.5rem;
+  }
+
+  .login-container h2 {
+    font-size: 2.2rem;
+  }
+
+  .login-container p {
+    font-size: 1.2rem;
+  }
+
+  .login-container input[type="email"],
+  .login-container input[type="password"] {
+    padding: 0.8rem 1.2rem;
+    font-size: 1.1rem;
+  }
+
+  .login-container button[type="submit"] {
+    padding: 0.8rem 0;
+    font-size: 1.2rem;
+  }
+
+  .login-container .success,
+  .login-container .error {
+    font-size: 1rem;
+  }
+
+  .login-container a {
+    font-size: 1rem;
+  }
+}

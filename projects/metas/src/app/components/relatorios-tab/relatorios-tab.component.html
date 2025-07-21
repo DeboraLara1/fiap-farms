@@ -1,0 +1,174 @@
+<div class="relatorios-container">
+  <div class="filters-section">
+    <div class="filters">
+      <div class="filter-group">
+        <label for="filtroPeriodo">Período:</label>
+        <select id="filtroPeriodo" [(ngModel)]="filtroPeriodo" (change)="calcularRelatorio()" class="form-input">
+          <option value="todos">Todos os períodos</option>
+          <option value="mes">Este mês</option>
+          <option value="trimestre">Este trimestre</option>
+          <option value="ano">Este ano</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filtroTipo">Tipo de meta:</label>
+        <select id="filtroTipo" [(ngModel)]="filtroTipo" (change)="calcularRelatorio()" class="form-input">
+          <option value="todos">Todos os tipos</option>
+          <option *ngFor="let tipo of tiposMeta" [value]="tipo.value">
+            {{ tipo.icon }} {{ tipo.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <button (click)="carregarMetas()" class="btn btn-outline">
+      <span>🔄</span> Atualizar
+    </button>
+  </div>
+
+  <div class="metrics-section">
+    <h3>📊 Métricas Gerais</h3>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon">🎯</div>
+        <div class="metric-content">
+          <span class="metric-number">{{ relatorio.totalMetas }}</span>
+          <span class="metric-label">Total de Metas</span>
+        </div>
+      </div>
+      <div class="metric-card success">
+        <div class="metric-icon">✅</div>
+        <div class="metric-content">
+          <span class="metric-number">{{ relatorio.metasConcluidas }}</span>
+          <span class="metric-label">Concluídas</span>
+        </div>
+      </div>
+      <div class="metric-card active">
+        <div class="metric-icon">🔄</div>
+        <div class="metric-content">
+          <span class="metric-number">{{ relatorio.metasAtivas }}</span>
+          <span class="metric-label">Ativas</span>
+        </div>
+      </div>
+      <div class="metric-card warning">
+        <div class="metric-icon">⏰</div>
+        <div class="metric-content">
+          <span class="metric-number">{{ relatorio.metasAtrasadas }}</span>
+          <span class="metric-label">Atrasadas</span>
+        </div>
+      </div>
+      <div class="metric-card primary">
+        <div class="metric-icon">📈</div>
+        <div class="metric-content">
+          <span class="metric-number">{{ formatarPercentual(relatorio.taxaSucesso) }}</span>
+          <span class="metric-label">Taxa de Sucesso</span>
+        </div>
+      </div>
+      <div class="metric-card info">
+        <div class="metric-icon">💰</div>
+        <div class="metric-content">
+          <span class="metric-number">{{ formatarPercentual(relatorio.progressoGeral) }}</span>
+          <span class="metric-label">Progresso Geral</span>
+        </div>
+      </div>
+    </div>
+    <div class="progress-section">
+      <div class="progress-info">
+        <span>Progresso Geral: {{ formatarValor(relatorio.valorTotalAtual) }} / {{ formatarValor(relatorio.valorTotalMeta) }}</span>
+        <span class="progress-percentage">{{ formatarPercentual(relatorio.progressoGeral) }}</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="relatorio.progressoGeral"></div>
+      </div>
+    </div>
+  </div>
+  <div class="analyses-section">
+    <div class="analysis-grid">
+      <div class="analysis-card">
+        <h4>📊 Metas por Tipo</h4>
+        <div class="analysis-content">
+          <div *ngFor="let item of getMetasPorTipo()" class="analysis-item">
+            <div class="analysis-header">
+              <span class="analysis-icon" [style.background-color]="item.color">{{ item.icon }}</span>
+              <span class="analysis-title">{{ item.tipo }}</span>
+              <span class="analysis-count">{{ item.count }}</span>
+            </div>
+            <div class="analysis-details">
+              <span class="detail-item success">✅ {{ item.concluidas }}</span>
+              <span class="detail-item active">🔄 {{ item.ativas }}</span>
+              <span class="detail-item warning">⏰ {{ item.atrasadas }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-card">
+        <h4>🎯 Metas por Prioridade</h4>
+        <div class="analysis-content">
+          <div *ngFor="let item of getMetasPorPrioridade()" class="analysis-item">
+            <div class="analysis-header">
+              <span class="priority-indicator" [style.background-color]="item.color"></span>
+              <span class="analysis-title">{{ item.prioridade }}</span>
+              <span class="analysis-count">{{ item.count }}</span>
+            </div>
+            <div class="analysis-details">
+              <span class="detail-item success">✅ {{ item.concluidas }}</span>
+              <span class="detail-item pending">⏳ {{ item.count - item.concluidas }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="lists-section">
+    <div class="lists-grid">
+      <div class="list-card">
+        <h4>🏆 Top 5 Metas</h4>
+        <div class="list-content">
+          <div *ngFor="let meta of getTopMetas(); let i = index" class="list-item">
+            <div class="item-rank">{{ i + 1 }}</div>
+            <div class="item-info">
+              <h5>{{ meta.titulo }}</h5>
+              <p>{{ meta.descricao }}</p>
+              <div class="item-progress">
+                <div class="progress-bar small">
+                  <div class="progress-fill" [style.width.%]="calcularProgresso(meta)"></div>
+                </div>
+                <span class="progress-text">{{ formatarPercentual(calcularProgresso(meta)) }}</span>
+              </div>
+            </div>
+            <div class="item-status">
+              <span class="status-badge" [style.color]="getStatusColor(meta.status)">
+                {{ getStatusLabel(meta.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="list-card">
+        <h4>⏰ Metas Atrasadas</h4>
+        <div class="list-content">
+          <div *ngFor="let meta of getMetasAtrasadas()" class="list-item atrasada">
+            <div class="item-icon">⚠️</div>
+            <div class="item-info">
+              <h5>{{ meta.titulo }}</h5>
+              <p>{{ meta.descricao }}</p>
+              <div class="item-details">
+                <span class="detail">Vencimento: {{ formatarData(meta.dataFim) }}</span>
+                <span class="detail">Atraso: {{ getDiasAtrasados(meta) }} dias</span>
+              </div>
+            </div>
+            <div class="item-status">
+              <span class="status-badge warning">⏰ Atrasada</span>
+            </div>
+          </div>
+          <div *ngIf="getMetasAtrasadas().length === 0" class="empty-state">
+            <div class="empty-icon">🎉</div>
+            <p>Nenhuma meta atrasada!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

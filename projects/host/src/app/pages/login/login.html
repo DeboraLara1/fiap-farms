@@ -1,0 +1,22 @@
+<div class="login-container">
+  <h2>Login</h2>
+  <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+    <div>
+      <label for="email">E-mail</label>
+      <input id="email" name="email" type="email" [(ngModel)]="email" required autocomplete="username" />
+    </div>
+    <div>
+      <label for="password">Senha</label>
+      <input id="password" name="password" type="password" [(ngModel)]="password" required autocomplete="current-password" />
+    </div>
+    <div>
+      <input id="rememberMe" type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
+      <label for="rememberMe">Lembrar meu e-mail</label>
+    </div>
+    <button type="submit" [disabled]="loading || !loginForm.form.valid">Entrar</button>
+    <a href="#" (click)="$event.preventDefault(); onResetPassword()">Esqueci minha senha?</a>
+    <div *ngIf="resetSent" class="success">E-mail de redefinição enviado!</div>
+    <div *ngIf="error" class="error">{{ error }}</div>
+    <div *ngIf="loading">Entrando...</div>
+  </form>
+</div>

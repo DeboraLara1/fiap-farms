@@ -1,0 +1,147 @@
+<div class="notificacoes-container">
+  <div class="stats-header">
+    <div class="stat-card">
+      <span class="stat-number">{{ notificacoes.length }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-card unread">
+      <span class="stat-number">{{ getNotificacoesNaoLidas() }}</span>
+      <span class="stat-label">Não Lidas</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number">{{ getNotificacoesAltaPrioridade() }}</span>
+      <span class="stat-label">Alta Prioridade</span>
+    </div>
+  </div>
+  <div class="filters-section">
+    <div class="filters">
+      <div class="filter-group">
+        <label for="filtroTipo">Filtrar por tipo:</label>
+        <select id="filtroTipo" [(ngModel)]="filtroTipo" class="form-input">
+          <option value="todas">Todas as notificações</option>
+          <option *ngFor="let tipo of tiposNotificacao" [value]="tipo.value">
+            {{ tipo.icon }} {{ tipo.label }}
+          </option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="mostrarLidas">
+          <span class="checkmark"></span>
+          Mostrar lidas
+        </label>
+      </div>
+    </div>
+    <div class="actions">
+      <button (click)="marcarTodasComoLidas()" class="btn btn-outline" [disabled]="getNotificacoesNaoLidas() === 0">
+        <span>✅</span> Marcar todas como lidas
+      </button>
+      <button (click)="limparNotificacoesLidas()" class="btn btn-secondary" [disabled]="getNotificacoesLidas() === 0">
+        <span>🗑️</span> Limpar lidas
+      </button>
+    </div>
+  </div>
+  <div class="notificacoes-section">
+    <h3>🔔 Notificações ({{ getNotificacoesFiltradas().length }})</h3>
+    <div class="notificacoes-list">
+      <div *ngFor="let notificacao of getNotificacoesFiltradas()"
+           class="notificacao-card"
+           [class.lida]="notificacao.lida"
+           [class.alta-prioridade]="notificacao.prioridade === 'alta'">
+        <div class="notificacao-header">
+          <div class="notificacao-icon" [style.background-color]="getTipoColor(notificacao.tipo)">
+            {{ getTipoIcon(notificacao.tipo) }}
+          </div>
+          <div class="notificacao-info">
+            <h4>{{ notificacao.titulo }}</h4>
+            <p>{{ notificacao.mensagem }}</p>
+            <div class="notificacao-meta">
+              <span class="tipo-badge">{{ getTipoLabel(notificacao.tipo) }}</span>
+              <span class="prioridade-badge" [style.background-color]="getPrioridadeColor(notificacao.prioridade)">
+                {{ notificacao.prioridade }}
+              </span>
+              <span class="tempo">{{ formatarData(notificacao.dataCriacao) }}</span>
+            </div>
+          </div>
+          <div class="notificacao-actions">
+            <button *ngIf="!notificacao.lida"
+                    (click)="marcarComoLida(notificacao)"
+                    class="btn-icon btn-read"
+                    title="Marcar como lida">
+              ✅
+            </button>
+            <button (click)="excluirNotificacao(notificacao.id!)"
+                    class="btn-icon btn-delete"
+                    title="Excluir">
+              🗑️
+            </button>
+          </div>
+        </div>
+        <div *ngIf="notificacao.acao" class="notificacao-acao">
+          <button class="btn btn-sm btn-primary">
+            {{ notificacao.acao }}
+          </button>
+        </div>
+      </div>
+      <div *ngIf="getNotificacoesFiltradas().length === 0" class="empty-state">
+        <div class="empty-icon">🔔</div>
+        <h3>Nenhuma notificação encontrada</h3>
+        <p>Tente ajustar os filtros ou aguarde novas notificações.</p>
+      </div>
+    </div>
+  </div>
+  <div class="configuracoes-section">
+    <h3>⚙️ Configurações de Notificações</h3>
+    <div class="configuracoes-grid">
+      <div *ngFor="let tipo of tiposNotificacao" class="config-card">
+        <div class="config-header">
+          <div class="config-icon" [style.background-color]="tipo.color">
+            {{ tipo.icon }}
+          </div>
+          <div class="config-info">
+            <h4>{{ tipo.label }}</h4>
+            <p>Configurar notificações de {{ tipo.label.toLowerCase() }}</p>
+          </div>
+        </div>
+        <div class="config-options">
+          <div class="config-option">
+            <label class="switch">
+              <input type="checkbox"
+                     [checked]="getConfiguracao(tipo.value)?.ativo"
+                     (change)="getConfiguracao(tipo.value)!.ativo = $any($event.target).checked; atualizarConfiguracao(getConfiguracao(tipo.value)!)">
+              <span class="slider"></span>
+            </label>
+            <span>Ativar notificações</span>
+          </div>
+          <div class="config-option">
+            <label class="switch">
+              <input type="checkbox"
+                     [checked]="getConfiguracao(tipo.value)?.email"
+                     (change)="getConfiguracao(tipo.value)!.email = $any($event.target).checked; atualizarConfiguracao(getConfiguracao(tipo.value)!)">
+              <span class="slider"></span>
+            </label>
+            <span>Notificações por email</span>
+          </div>
+          <div class="config-option">
+            <label class="switch">
+              <input type="checkbox"
+                     [checked]="getConfiguracao(tipo.value)?.push"
+                     (change)="getConfiguracao(tipo.value)!.push = $any($event.target).checked; atualizarConfiguracao(getConfiguracao(tipo.value)!)">
+              <span class="slider"></span>
+            </label>
+            <span>Notificações push</span>
+          </div>
+          <div class="config-option">
+            <label class="switch">
+              <input type="checkbox"
+                     [checked]="getConfiguracao(tipo.value)?.som"
+                     (change)="getConfiguracao(tipo.value)!.som = $any($event.target).checked; atualizarConfiguracao(getConfiguracao(tipo.value)!)">
+              <span class="slider"></span>
+            </label>
+            <span>Som de notificação</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,104 @@
+<div class="dashboard-container">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-content">
+        <h3>{{ totalProdutos }}</h3>
+        <p>Total de Produtos</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-content">
+        <h3>{{ totalVendas }}</h3>
+        <p>Total de Vendas</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💵</div>
+      <div class="stat-content">
+        <h3>R$ {{ valorTotalVendas | number:'1.2-2' }}</h3>
+        <p>Valor Total Vendido</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📈</div>
+      <div class="stat-content">
+        <h3>R$ {{ lucroTotal | number:'1.2-2' }}</h3>
+        <p>Lucro Total</p>
+      </div>
+    </div>
+  </div>
+  <div class="alerts-section" *ngIf="produtosBaixoEstoque > 0">
+    <div class="alert alert-warning">
+      <span class="alert-icon">⚠️</span>
+      <div class="alert-content">
+        <h4>Produtos com Baixo Estoque</h4>
+        <p>{{ produtosBaixoEstoque }} produto(s) com quantidade menor que 10 unidades</p>
+      </div>
+    </div>
+  </div>
+  <div class="content-grid">
+    <div class="chart-card">
+      <h3>📊 Produtos por Categoria</h3>
+      <div class="chart-content">
+        <div *ngFor="let item of produtosPorCategoria" class="chart-item">
+          <div class="chart-bar">
+            <div class="bar-fill" [style.width.%]="(item.quantidade / totalProdutos) * 100"></div>
+          </div>
+          <div class="chart-label">
+            <span class="category-name">{{ item.categoria }}</span>
+            <span class="category-count">{{ item.quantidade }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>🏆 Top Produtos Vendidos</h3>
+      <div class="chart-content">
+        <div *ngFor="let produto of topProdutosVendidos; let i = index" class="top-item">
+          <div class="rank">{{ i + 1 }}</div>
+          <div class="product-info">
+            <strong>{{ produto.nome }}</strong>
+            <small>{{ produto.quantidade }} unidades vendidas</small>
+          </div>
+          <div class="product-value">
+            R$ {{ produto.valor | number:'1.2-2' }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>⚠️ Produtos com Baixo Estoque</h3>
+      <div class="chart-content">
+        <div *ngFor="let produto of getProdutosBaixoEstoque()" class="low-stock-item">
+          <div class="product-name">{{ produto.nome }}</div>
+          <div class="stock-info">
+            <span class="stock-quantity">{{ produto.quantidade }} {{ produto.unidade }}</span>
+            <span class="stock-status">Baixo Estoque</span>
+          </div>
+        </div>
+        <div *ngIf="getProdutosBaixoEstoque().length === 0" class="empty-state">
+          <p>🎉 Todos os produtos estão com estoque adequado!</p>
+        </div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>🕒 Vendas Recentes</h3>
+      <div class="chart-content">
+        <div *ngFor="let venda of getVendasRecentes()" class="recent-sale">
+          <div class="sale-info">
+            <strong>{{ venda.produtoNome }}</strong>
+            <small>{{ formatarData(venda.dataVenda) }}</small>
+          </div>
+          <div class="sale-amount">
+            R$ {{ venda.precoTotal | number:'1.2-2' }}
+          </div>
+        </div>
+        <div *ngIf="getVendasRecentes().length === 0" class="empty-state">
+          <p>Nenhuma venda registrada ainda</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

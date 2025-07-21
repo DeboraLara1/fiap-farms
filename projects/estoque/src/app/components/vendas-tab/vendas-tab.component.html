@@ -1,0 +1,136 @@
+<div class="vendas-container">
+  <div class="form-section">
+    <h2>💰 Registrar Nova Venda</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="produto">Produto *</label>
+        <select
+          id="produto"
+          [(ngModel)]="novaVenda.produtoId"
+          (change)="onProdutoChange()"
+          class="form-input">
+          <option value="">Selecione um produto</option>
+          <option
+            *ngFor="let produto of produtos"
+            [value]="produto.id"
+            [disabled]="!getProdutoDisponivel(produto)">
+            {{ produto.nome }} - {{ produto.quantidade }} {{ produto.unidade }} (R$ {{ produto.precoVenda | number:'1.2-2' }})
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="cliente">Cliente *</label>
+        <input
+          type="text"
+          id="cliente"
+          [(ngModel)]="novaVenda.cliente"
+          placeholder="Nome do cliente"
+          class="form-input">
+      </div>
+      <div class="form-group">
+        <label for="quantidade">Quantidade *</label>
+        <input
+          type="number"
+          id="quantidade"
+          [(ngModel)]="novaVenda.quantidade"
+          (input)="calcularTotal()"
+          min="1"
+          class="form-input">
+      </div>
+      <div class="form-group">
+        <label for="precoUnitario">Preço Unitário (R$)</label>
+        <input
+          type="number"
+          id="precoUnitario"
+          [(ngModel)]="novaVenda.precoUnitario"
+          (input)="calcularTotal()"
+          step="0.01"
+          readonly
+          class="form-input readonly">
+      </div>
+      <div class="form-group">
+        <label for="precoTotal">Total (R$)</label>
+        <input
+          type="number"
+          id="precoTotal"
+          [(ngModel)]="novaVenda.precoTotal"
+          readonly
+          class="form-input readonly total">
+      </div>
+    </div>
+    <div class="form-group full-width">
+      <label for="observacoes">Observações</label>
+      <textarea
+        id="observacoes"
+        [(ngModel)]="novaVenda.observacoes"
+        placeholder="Observações sobre a venda..."
+        rows="3"
+        class="form-input"></textarea>
+    </div>
+    <div class="form-actions">
+      <button
+        (click)="registrarVenda()"
+        class="btn btn-primary"
+        [disabled]="!validarVenda()">
+        <span>💰</span> Registrar Venda
+      </button>
+      <button (click)="limparFormulario()" class="btn btn-secondary">
+        <span>🔄</span> Limpar
+      </button>
+    </div>
+  </div>
+  <div class="table-section">
+    <div class="table-header">
+      <h2>📋 Histórico de Vendas ({{ vendas.length }})</h2>
+      <div class="table-actions">
+        <button (click)="carregarVendas()" class="btn btn-outline">
+          <span>🔄</span> Atualizar
+        </button>
+      </div>
+    </div>
+    <div class="table-container">
+      <table class="sales-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Produto</th>
+            <th>Cliente</th>
+            <th>Qtd</th>
+            <th>Preço Unit.</th>
+            <th>Total</th>
+            <th>Observações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let venda of vendas" class="sale-row">
+            <td>{{ formatarData(venda.dataVenda) }}</td>
+            <td>
+              <strong>{{ venda.produtoNome }}</strong>
+            </td>
+            <td>{{ venda.cliente }}</td>
+            <td>{{ venda.quantidade }}</td>
+            <td>R$ {{ venda.precoUnitario | number:'1.2-2' }}</td>
+            <td>
+              <span class="total-amount">
+                R$ {{ venda.precoTotal | number:'1.2-2' }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="venda.observacoes" class="observations">
+                {{ venda.observacoes }}
+              </span>
+              <span *ngIf="!venda.observacoes" class="no-observations">
+                -
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="vendas.length === 0" class="empty-state">
+        <div class="empty-icon">💰</div>
+        <h3>Nenhuma venda registrada</h3>
+        <p>Registre sua primeira venda usando o formulário acima!</p>
+      </div>
+    </div>
+  </div>
+</div>

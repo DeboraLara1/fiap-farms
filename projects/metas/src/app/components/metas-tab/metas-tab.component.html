@@ -1,0 +1,172 @@
+<div class="metas-container">
+  <div class="form-section">
+    <h2>{{ editando ? 'Editar Meta' : 'Criar Nova Meta' }}</h2>
+    <form *ngIf="!editando">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="titulo">Título da Meta *</label>
+          <input type="text" id="titulo" [(ngModel)]="novaMeta.titulo" name="titulo" placeholder="Ex: Atingir R$ 50.000 em vendas" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="tipo">Tipo de Meta *</label>
+          <select id="tipo" [(ngModel)]="novaMeta.tipo" name="tipo" class="form-input">
+            <option *ngFor="let tipo of tiposMeta" [value]="tipo.value">{{ tipo.icon }} {{ tipo.label }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="valorMeta">Valor da Meta *</label>
+          <input type="number" id="valorMeta" [(ngModel)]="novaMeta.valorMeta" name="valorMeta" min="1" placeholder="0" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="valorAtual">Valor Atual</label>
+          <input type="number" id="valorAtual" [(ngModel)]="novaMeta.valorAtual" name="valorAtual" min="0" placeholder="0" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="dataInicio">Data de Início</label>
+          <input type="date" id="dataInicio" [(ngModel)]="novaMeta.dataInicio" name="dataInicio" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="dataFim">Data de Fim *</label>
+          <input type="date" id="dataFim" [(ngModel)]="novaMeta.dataFim" name="dataFim" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="prioridade">Prioridade</label>
+          <select id="prioridade" [(ngModel)]="novaMeta.prioridade" name="prioridade" class="form-input">
+            <option *ngFor="let prioridade of prioridades" [value]="prioridade.value">{{ prioridade.label }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group full-width">
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" [(ngModel)]="novaMeta.descricao" name="descricao" placeholder="Descreva detalhadamente sua meta..." rows="3" class="form-input"></textarea>
+      </div>
+      <div class="form-actions">
+        <button (click)="criarMeta()" class="btn btn-primary" [disabled]="!validarMeta()">
+          <span>🎯</span> Criar Meta
+        </button>
+      </div>
+    </form>
+    <form *ngIf="editando && metaEditando">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="tituloEdit">Título da Meta *</label>
+          <input type="text" id="tituloEdit" [(ngModel)]="metaEditando.titulo" name="tituloEdit" placeholder="Ex: Atingir R$ 50.000 em vendas" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="tipoEdit">Tipo de Meta *</label>
+          <select id="tipoEdit" [(ngModel)]="metaEditando.tipo" name="tipoEdit" class="form-input">
+            <option *ngFor="let tipo of tiposMeta" [value]="tipo.value">{{ tipo.icon }} {{ tipo.label }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="valorMetaEdit">Valor da Meta *</label>
+          <input type="number" id="valorMetaEdit" [(ngModel)]="metaEditando.valorMeta" name="valorMetaEdit" min="1" placeholder="0" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="valorAtualEdit">Valor Atual</label>
+          <input type="number" id="valorAtualEdit" [(ngModel)]="metaEditando.valorAtual" name="valorAtualEdit" min="0" placeholder="0" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="dataInicioEdit">Data de Início</label>
+          <input type="date" id="dataInicioEdit" [(ngModel)]="metaEditando.dataInicio" name="dataInicioEdit" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="dataFimEdit">Data de Fim *</label>
+          <input type="date" id="dataFimEdit" [(ngModel)]="metaEditando.dataFim" name="dataFimEdit" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="prioridadeEdit">Prioridade</label>
+          <select id="prioridadeEdit" [(ngModel)]="metaEditando.prioridade" name="prioridadeEdit" class="form-input">
+            <option *ngFor="let prioridade of prioridades" [value]="prioridade.value">{{ prioridade.label }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group full-width">
+        <label for="descricaoEdit">Descrição</label>
+        <textarea id="descricaoEdit" [(ngModel)]="metaEditando.descricao" name="descricaoEdit" placeholder="Descreva detalhadamente sua meta..." rows="3" class="form-input"></textarea>
+      </div>
+      <div class="form-actions">
+        <button (click)="salvarEdicao()" class="btn btn-success">
+          <span>💾</span> Salvar Alterações
+        </button>
+        <button (click)="cancelarEdicao()" class="btn btn-secondary">
+          <span>❌</span> Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+  <div class="metas-section">
+    <div class="section-header">
+      <h2>📋 Suas Metas ({{ metas.length }})</h2>
+      <button (click)="carregarMetas()" class="btn btn-outline">
+        <span>🔄</span> Atualizar
+      </button>
+    </div>
+    <div class="metas-grid">
+      <div *ngFor="let meta of metas" class="meta-card" [class.atrasada]="isMetaAtrasada(meta)">
+        <div class="meta-header">
+          <div class="meta-icon">{{ getTipoIcon(meta.tipo) }}</div>
+          <div class="meta-info">
+            <h3>{{ meta.titulo }}</h3>
+            <p>{{ meta.descricao }}</p>
+          </div>
+          <div class="meta-actions">
+            <button (click)="editarMeta(meta)" class="btn-icon btn-edit" title="Editar">
+              ✏️
+            </button>
+            <button (click)="excluirMeta(meta.id!)" class="btn-icon btn-delete" title="Excluir">
+              🗑️
+            </button>
+          </div>
+        </div>
+        <div class="meta-details">
+          <div class="meta-type">
+            <span class="type-badge">{{ getTipoLabel(meta.tipo) }}</span>
+            <span class="priority-badge" [style.background-color]="getPrioridadeColor(meta.prioridade)">
+              {{ meta.prioridade }}
+            </span>
+          </div>
+          <div class="meta-progress">
+            <div class="progress-info">
+              <span>R$ {{ meta.valorAtual | number:'1.2-2' }} / R$ {{ meta.valorMeta | number:'1.2-2' }}</span>
+              <span class="progress-percentage">{{ calcularProgresso(meta) | number:'1.0-0' }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="calcularProgresso(meta)"></div>
+            </div>
+          </div>
+          <div class="meta-dates">
+            <small>Início: {{ formatarData(meta.dataInicio) }}</small>
+            <small>Fim: {{ formatarData(meta.dataFim) }}</small>
+          </div>
+          <div class="meta-status">
+            <span class="status-badge" [style.color]="getStatusColor(meta.status)">
+              {{ getStatusLabel(meta.status) }}
+            </span>
+          </div>
+          <div class="meta-update">
+            <label for="novoValor">Atualizar Progresso:</label>
+            <div class="update-input">
+              <input
+                type="number"
+                [value]="meta.valorAtual"
+                (change)="atualizarProgresso(meta, $any($event.target).value)"
+                min="0"
+                class="form-input small">
+              <button
+                (click)="atualizarProgresso(meta, meta.valorAtual)"
+                class="btn btn-sm btn-primary">
+                Atualizar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="metas.length === 0" class="empty-state">
+        <div class="empty-icon">🎯</div>
+        <h3>Nenhuma meta criada</h3>
+        <p>Crie sua primeira meta usando o formulário acima!</p>
+      </div>
+    </div>
+  </div>
+</div>

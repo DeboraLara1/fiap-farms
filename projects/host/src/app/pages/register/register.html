@@ -1,0 +1,16 @@
+<div class="register-container">
+  <h2>Cadastro</h2>
+  <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+    <div>
+      <label for="email">E-mail</label>
+      <input id="email" name="email" type="email" [(ngModel)]="email" required autocomplete="username" />
+    </div>
+    <div>
+      <label for="password">Senha</label>
+      <input id="password" name="password" type="password" [(ngModel)]="password" required autocomplete="new-password" />
+    </div>
+    <button type="submit" [disabled]="loading || !registerForm.form.valid">Cadastrar</button>
+    <div *ngIf="error" class="error">{{ error }}</div>
+    <div *ngIf="loading">Cadastrando...</div>
+  </form>
+</div>
