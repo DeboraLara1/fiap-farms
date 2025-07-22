@@ -41,7 +41,7 @@
         <textarea id="descricao" [(ngModel)]="novaMeta.descricao" name="descricao" placeholder="Descreva detalhadamente sua meta..." rows="3" class="form-input"></textarea>
       </div>
       <div class="form-actions">
-        <button (click)="criarMeta()" class="btn btn-primary" [disabled]="!validarMeta()">
+        <button type="button" (click)="criarMeta()" class="btn btn-primary" [disabled]="!validarMeta()">
           <span>🎯</span> Criar Meta
         </button>
       </div>
@@ -98,9 +98,6 @@
   <div class="metas-section">
     <div class="section-header">
       <h2>📋 Suas Metas ({{ metas.length }})</h2>
-      <button (click)="carregarMetas()" class="btn btn-outline">
-        <span>🔄</span> Atualizar
-      </button>
     </div>
     <div class="metas-grid">
       <div *ngFor="let meta of metas" class="meta-card" [class.atrasada]="isMetaAtrasada(meta)">

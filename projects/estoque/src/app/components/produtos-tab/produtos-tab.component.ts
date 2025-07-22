@@ -138,13 +138,26 @@ export class ProdutosTabComponent implements OnInit {
     } as Produto));
   }
 
+  private removeUndefinedFields(obj: any) {
+    Object.keys(obj).forEach(key => {
+      if (obj[key] === undefined) {
+        delete obj[key];
+      }
+    });
+    return obj;
+  }
+
   async adicionarProduto() {
     if (this.validarProduto()) {
       const produtosRef = collection(this.firestore, 'produtos');
-      await addDoc(produtosRef, {
+      const produtoParaSalvar = this.removeUndefinedFields({
         ...this.novoProduto,
+        precoCusto: Number(String(this.novoProduto.precoCusto).replace(',', '.')),
+        precoVenda: Number(String(this.novoProduto.precoVenda).replace(',', '.')),
+        quantidade: Number(String(this.novoProduto.quantidade).replace(',', '.')),
         dataCadastro: new Date()
       });
+      await addDoc(produtosRef, produtoParaSalvar);
 
       this.limparFormulario();
       this.carregarProdutos();
@@ -159,15 +172,16 @@ export class ProdutosTabComponent implements OnInit {
   async salvarEdicao() {
     if (this.produtoEditando && this.produtoEditando.id) {
       const produtoRef = doc(this.firestore, 'produtos', this.produtoEditando.id);
-      await updateDoc(produtoRef, {
+      const produtoParaSalvar = this.removeUndefinedFields({
         nome: this.produtoEditando.nome,
         categoria: this.produtoEditando.categoria,
-        precoCusto: this.produtoEditando.precoCusto,
-        precoVenda: this.produtoEditando.precoVenda,
-        quantidade: this.produtoEditando.quantidade,
+        precoCusto: Number(String(this.produtoEditando.precoCusto).replace(',', '.')),
+        precoVenda: Number(String(this.produtoEditando.precoVenda).replace(',', '.')),
+        quantidade: Number(String(this.produtoEditando.quantidade).replace(',', '.')),
         unidade: this.produtoEditando.unidade,
         descricao: this.produtoEditando.descricao
       });
+      await updateDoc(produtoRef, produtoParaSalvar);
 
       this.cancelarEdicao();
       this.carregarProdutos();

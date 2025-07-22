@@ -79,7 +79,8 @@ export class TopProductsChartComponent implements OnInit, OnChanges {
           callback: (value: any) => {
             return `R$ ${value}`;
           }
-        }
+        },
+        beginAtZero: true
       },
       y: {
         grid: {
@@ -109,6 +110,7 @@ export class TopProductsChartComponent implements OnInit, OnChanges {
     if (this.data && this.data.length > 0) {
       this.barChartData.labels = this.data.map(item => item.produto);
       this.barChartData.datasets[0].data = this.data.map(item => item.valor);
+      this.barChartData = { ...this.barChartData };
     } else {
       this.barChartData.labels = ['Sem dados'];
       this.barChartData.datasets[0].data = [0];

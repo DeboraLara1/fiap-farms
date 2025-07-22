@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot } from '@angular/fire/firestore';
 
 interface Meta {
   id?: string;
@@ -59,19 +59,32 @@ export class MetasTabComponent implements OnInit {
   constructor(private firestore: Firestore) {}
 
   ngOnInit() {
-    this.carregarMetas();
+    this.carregarMetasTempoReal();
   }
 
-  async carregarMetas() {
+  carregarMetasTempoReal() {
     const metasRef = collection(this.firestore, 'metas');
-    const snapshot = await getDocs(metasRef);
-    this.metas = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      dataInicio: doc.data()['dataInicio']?.toDate() || new Date(),
-      dataFim: doc.data()['dataFim']?.toDate() || new Date(),
-      dataCriacao: doc.data()['dataCriacao']?.toDate() || new Date()
-    } as Meta));
+    onSnapshot(metasRef, (snapshot) => {
+      this.metas = snapshot.docs.map(doc => {
+        const data = doc.data();
+        function parseDate(val: any): Date {
+          if (!val) return new Date();
+          if (typeof val.toDate === 'function') return val.toDate();
+          if (typeof val === 'string') return new Date(val);
+          if (val instanceof Date) return val;
+          return new Date();
+        }
+        return {
+          id: doc.id,
+          ...data,
+          valorAtual: Number(data['valorAtual']) || 0,
+          valorMeta: Number(data['valorMeta']) || 0,
+          dataInicio: parseDate(data['dataInicio']),
+          dataFim: parseDate(data['dataFim']),
+          dataCriacao: parseDate(data['dataCriacao'])
+        } as Meta;
+      });
+    });
   }
 
   async criarMeta() {
@@ -83,7 +96,6 @@ export class MetasTabComponent implements OnInit {
       });
 
       this.limparFormulario();
-      this.carregarMetas();
     }
   }
 
@@ -94,13 +106,14 @@ export class MetasTabComponent implements OnInit {
 
   async salvarEdicao() {
     if (this.metaEditando && this.metaEditando.id) {
+      const valorAtual = Number(this.metaEditando.valorAtual) || 0;
       const metaRef = doc(this.firestore, 'metas', this.metaEditando.id);
       await updateDoc(metaRef, {
         titulo: this.metaEditando.titulo,
         descricao: this.metaEditando.descricao,
         tipo: this.metaEditando.tipo,
         valorMeta: this.metaEditando.valorMeta,
-        valorAtual: this.metaEditando.valorAtual,
+        valorAtual: valorAtual,
         dataInicio: this.metaEditando.dataInicio,
         dataFim: this.metaEditando.dataFim,
         status: this.metaEditando.status,
@@ -108,7 +121,6 @@ export class MetasTabComponent implements OnInit {
       });
 
       this.cancelarEdicao();
-      this.carregarMetas();
     }
   }
 
@@ -121,18 +133,17 @@ export class MetasTabComponent implements OnInit {
     if (confirm('Tem certeza que deseja excluir esta meta?')) {
       const metaRef = doc(this.firestore, 'metas', id);
       await deleteDoc(metaRef);
-      this.carregarMetas();
     }
   }
 
   async atualizarProgresso(meta: Meta, novoValor: number) {
     if (meta.id) {
+      const valorAtual = Number(novoValor) || 0;
       const metaRef = doc(this.firestore, 'metas', meta.id);
       await updateDoc(metaRef, {
-        valorAtual: novoValor,
-        status: novoValor >= meta.valorMeta ? 'concluida' : 'ativa'
+        valorAtual: valorAtual,
+        status: valorAtual >= meta.valorMeta ? 'concluida' : 'ativa'
       });
-      this.carregarMetas();
     }
   }
 

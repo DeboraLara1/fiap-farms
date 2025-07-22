@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot } from '@angular/fire/firestore';
 
 interface Notificacao {
   id?: string;
@@ -54,19 +54,30 @@ export class NotificacoesTabComponent implements OnInit {
   constructor(private firestore: Firestore) {}
 
   ngOnInit() {
-    this.carregarNotificacoes();
+    this.carregarNotificacoesTempoReal();
     this.carregarConfiguracoes();
   }
 
-  async carregarNotificacoes() {
+  carregarNotificacoesTempoReal() {
     const notificacoesRef = collection(this.firestore, 'notificacoes');
-    const snapshot = await getDocs(notificacoesRef);
-    this.notificacoes = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      dataCriacao: doc.data()['dataCriacao']?.toDate() || new Date(),
-      dataLeitura: doc.data()['dataLeitura']?.toDate() || undefined
-    } as Notificacao));
+    onSnapshot(notificacoesRef, (snapshot) => {
+      this.notificacoes = snapshot.docs.map(doc => {
+        const data = doc.data();
+        function parseDate(val: any): Date {
+          if (!val) return new Date();
+          if (typeof val.toDate === 'function') return val.toDate();
+          if (typeof val === 'string') return new Date(val);
+          if (val instanceof Date) return val;
+          return new Date();
+        }
+        return {
+          id: doc.id,
+          ...data,
+          dataCriacao: parseDate(data['dataCriacao']),
+          dataLeitura: parseDate(data['dataLeitura'])
+        } as Notificacao;
+      });
+    });
   }
 
   async carregarConfiguracoes() {
@@ -105,7 +116,6 @@ export class NotificacoesTabComponent implements OnInit {
         lida: true,
         dataLeitura: new Date()
       });
-      this.carregarNotificacoes();
     }
   }
 
@@ -121,7 +131,6 @@ export class NotificacoesTabComponent implements OnInit {
     if (confirm('Tem certeza que deseja excluir esta notificação?')) {
       const notifRef = doc(this.firestore, 'notificacoes', id);
       await deleteDoc(notifRef);
-      this.carregarNotificacoes();
     }
   }
 
@@ -136,7 +145,6 @@ export class NotificacoesTabComponent implements OnInit {
         }
       }
 
-      this.carregarNotificacoes();
     }
   }
 

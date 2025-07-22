@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, getDocs } from '@angular/fire/firestore';
+import { Firestore, collection, onSnapshot } from '@angular/fire/firestore';
 
 interface Meta {
   id?: string;
@@ -61,21 +61,33 @@ export class RelatoriosTabComponent implements OnInit {
   constructor(private firestore: Firestore) {}
 
   ngOnInit() {
-    this.carregarMetas();
+    this.carregarMetasTempoReal();
   }
 
-  async carregarMetas() {
+  carregarMetasTempoReal() {
     const metasRef = collection(this.firestore, 'metas');
-    const snapshot = await getDocs(metasRef);
-    this.metas = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      dataInicio: doc.data()['dataInicio']?.toDate() || new Date(),
-      dataFim: doc.data()['dataFim']?.toDate() || new Date(),
-      dataCriacao: doc.data()['dataCriacao']?.toDate() || new Date()
-    } as Meta));
-
-    this.calcularRelatorio();
+    onSnapshot(metasRef, (snapshot) => {
+      this.metas = snapshot.docs.map(doc => {
+        const data = doc.data();
+        function parseDate(val: any): Date {
+          if (!val) return new Date();
+          if (typeof val.toDate === 'function') return val.toDate();
+          if (typeof val === 'string') return new Date(val);
+          if (val instanceof Date) return val;
+          return new Date();
+        }
+        return {
+          id: doc.id,
+          ...data,
+          valorAtual: Number(data['valorAtual']) || 0,
+          valorMeta: Number(data['valorMeta']) || 0,
+          dataInicio: parseDate(data['dataInicio']),
+          dataFim: parseDate(data['dataFim']),
+          dataCriacao: parseDate(data['dataCriacao'])
+        } as Meta;
+      });
+      this.calcularRelatorio();
+    });
   }
 
   calcularRelatorio() {

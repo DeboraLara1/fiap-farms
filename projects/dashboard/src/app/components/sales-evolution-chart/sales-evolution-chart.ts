@@ -111,6 +111,7 @@ export class SalesEvolutionChartComponent implements OnInit, OnChanges {
         this.formatarData(item.data)
       );
       this.lineChartData.datasets[0].data = this.data.map(item => item.valor);
+      this.lineChartData = { ...this.lineChartData };
     } else {
       const ultimos7Dias = [];
       const hoje = new Date();

@@ -52,8 +52,8 @@ export class CategoryChartComponent implements OnInit, OnChanges {
     if (this.data && this.data.length > 0) {
       this.doughnutChartData.labels = this.data.map(item => item.categoria);
       this.doughnutChartData.datasets[0].data = this.data.map(item => item.valor);
+      this.doughnutChartData = { ...this.doughnutChartData };
     } else {
-      // Dados de exemplo quando não há dados
       this.doughnutChartData.labels = ['Sem dados'];
       this.doughnutChartData.datasets[0].data = [1];
       this.doughnutChartData.datasets[0].backgroundColor = ['#E0E0E0'];

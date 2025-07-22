@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, getDocs, query, orderBy, limit } from '@angular/fire/firestore';
+import { Firestore, collection,  query, orderBy,  onSnapshot } from '@angular/fire/firestore';
 import { Chart } from 'chart.js';
 import { SalesEvolutionChartComponent } from './components/sales-evolution-chart/sales-evolution-chart';
 import { CategoryChartComponent } from './components/category-chart/category-chart';
@@ -84,7 +84,70 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   constructor(private firestore: Firestore) {}
 
   ngOnInit() {
-    this.carregarDados();
+    // Aguardar um pouco para garantir que a autenticação esteja inicializada
+    setTimeout(() => {
+      this.iniciarListenersTempoReal();
+    }, 1000);
+  }
+
+  iniciarListenersTempoReal() {
+    this.carregarVendasTempoReal();
+    this.carregarProdutosTempoReal();
+  }
+
+  carregarVendasTempoReal() {
+    const vendasRef = collection(this.firestore, 'vendas');
+    const q = query(vendasRef, orderBy('dataVenda', 'desc'));
+    onSnapshot(q, (snapshot) => {
+      this.vendas = snapshot.docs.map(doc => {
+        const data = doc.data();
+        function parseDate(val: any): Date {
+          if (!val) return new Date();
+          if (typeof val.toDate === 'function') return val.toDate();
+          if (typeof val === 'string') return new Date(val);
+          if (val instanceof Date) return val;
+          return new Date();
+        }
+
+        let precoTotal = Number(data['precoTotal']);
+        if (isNaN(precoTotal) || precoTotal === 0) {
+          const precoUnitario = Number(data['precoUnitario']) || 0;
+          const quantidade = Number(data['quantidade']) || 0;
+          precoTotal = precoUnitario * quantidade;
+        }
+
+        return {
+          id: doc.id,
+          ...data,
+          precoTotal: precoTotal,
+          quantidade: Number(data['quantidade']) || 0,
+          dataVenda: parseDate(data['dataVenda'])
+        } as Venda;
+      });
+      this.calcularMetricas();
+      this.prepararDadosGraficos();
+    }, (error) => {
+      console.error('Erro ao carregar vendas:', error);
+    });
+  }
+
+  carregarProdutosTempoReal() {
+    const produtosRef = collection(this.firestore, 'produtos');
+    onSnapshot(produtosRef, (snapshot) => {
+      this.produtos = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          precoVenda: Number(data['precoVenda']) || 0,
+          quantidade: Number(data['quantidade']) || 0
+        } as Produto;
+      });
+      this.calcularMetricas();
+      this.prepararDadosGraficos();
+    }, (error) => {
+      console.error('Erro ao carregar produtos:', error);
+    });
   }
 
   ngAfterViewInit() {
@@ -105,49 +168,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
   }
 
-  async carregarDados() {
-    await Promise.all([
-      this.carregarVendas(),
-      this.carregarProdutos()
-    ]);
-    this.calcularMetricas();
-    this.prepararDadosGraficos();
-  }
-
-  async carregarVendas() {
-    const vendasRef = collection(this.firestore, 'vendas');
-    const q = query(vendasRef, orderBy('dataVenda', 'desc'));
-    const snapshot = await getDocs(q);
-    this.vendas = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      dataVenda: doc.data()['dataVenda']?.toDate() || new Date()
-    } as Venda));
-  }
-
-  async carregarProdutos() {
-    const produtosRef = collection(this.firestore, 'produtos');
-    const snapshot = await getDocs(produtosRef);
-    this.produtos = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as Produto));
-  }
-
   calcularMetricas() {
     const vendasFiltradas = this.filtrarVendasPorPeriodo();
-
     this.totalVendas = vendasFiltradas.length;
     this.valorTotalVendas = vendasFiltradas.reduce((sum, venda) => sum + venda.precoTotal, 0);
     this.produtosVendidos = vendasFiltradas.reduce((sum, venda) => sum + venda.quantidade, 0);
 
     this.lucroTotal = vendasFiltradas.reduce((sum, venda) => {
-      const produto = this.produtos.find(p => p.nome === venda.produtoNome);
-      if (produto) {
-        const lucroUnitario = produto.precoVenda * 0.3;
-        return sum + (lucroUnitario * venda.quantidade);
-      }
-      return sum;
+      const lucroVenda = venda.precoTotal * 0.3;
+      return sum + lucroVenda;
     }, 0);
 
     this.mediaVendas = this.totalVendas > 0 ? this.valorTotalVendas / this.totalVendas : 0;
@@ -178,12 +207,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         return this.vendas;
     }
 
-    return this.vendas.filter(venda => venda.dataVenda >= dataLimite);
+    const vendasFiltradas = this.vendas.filter(venda => venda.dataVenda >= dataLimite);
+    return vendasFiltradas;
   }
 
   agruparVendasPorDia(vendas: Venda[]): VendaData[] {
     const vendasPorDia = new Map<string, number>();
-
     const hoje = new Date();
     for (let i = 6; i >= 0; i--) {
       const data = new Date(hoje);
@@ -195,15 +224,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     vendas.forEach(venda => {
       const dataStr = venda.dataVenda.toISOString().split('T')[0];
       const valorAtual = vendasPorDia.get(dataStr) || 0;
-      vendasPorDia.set(dataStr, valorAtual + venda.precoTotal);
+      const novoValor = valorAtual + venda.precoTotal;
+      vendasPorDia.set(dataStr, novoValor);
     });
 
-    return Array.from(vendasPorDia.entries())
+    const resultado = Array.from(vendasPorDia.entries())
       .map(([data, valor]) => ({
         data: new Date(data),
         valor
       }))
       .sort((a, b) => a.data.getTime() - b.data.getTime());
+    return resultado;
   }
 
   agruparProdutosPorCategoria(): CategoriaData[] {
@@ -211,32 +242,35 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     this.produtos.forEach(produto => {
       const valorAtual = categorias.get(produto.categoria) || 0;
-      categorias.set(produto.categoria, valorAtual + (produto.precoVenda * produto.quantidade));
+      const valorProduto = produto.precoVenda * produto.quantidade;
+      categorias.set(produto.categoria, valorAtual + valorProduto);
     });
 
-    return Array.from(categorias.entries())
+    const resultado = Array.from(categorias.entries())
       .map(([categoria, valor]) => ({
         categoria,
         valor
       }))
       .sort((a, b) => b.valor - a.valor);
+
+    return resultado;
   }
 
   getTopProdutosVendidos(): ProdutoData[] {
     const produtosVendidos = new Map<string, number>();
-
     this.vendas.forEach(venda => {
       const valorAtual = produtosVendidos.get(venda.produtoNome) || 0;
       produtosVendidos.set(venda.produtoNome, valorAtual + venda.precoTotal);
     });
 
-    return Array.from(produtosVendidos.entries())
+    const resultado = Array.from(produtosVendidos.entries())
       .map(([produto, valor]) => ({
         produto,
         valor
       }))
       .sort((a, b) => b.valor - a.valor)
-      .slice(0, 5); 
+      .slice(0, 5);
+    return resultado;
   }
 
   onPeriodoChange() {

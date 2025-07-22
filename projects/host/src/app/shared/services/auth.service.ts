@@ -104,7 +104,9 @@ export class AuthService {
       } else {
         let subscription: any;
         subscription = this.user$.subscribe(user => {
-          subscription.unsubscribe();
+          if (subscription) {
+            subscription.unsubscribe();
+          }
           resolve(!!user);
         });
       }
