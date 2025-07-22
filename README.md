@@ -2,20 +2,6 @@
 
 Um sistema completo de gestão agrícola desenvolvido em Angular com Firebase, oferecendo controle de estoque, vendas, metas e relatórios em tempo real.
 
-## 📋 Índice
-
-- [Visão Geral](#visão-geral)
-- [Arquitetura do Sistema](#arquitetura-do-sistema)
-- [Funcionalidades](#funcionalidades)
-- [Tecnologias Utilizadas](#tecnologias-utilizadas)
-- [Pré-requisitos](#pré-requisitos)
-- [Instalação](#instalação)
-- [Configuração](#configuração)
-- [Executando o Projeto](#executando-o-projeto)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [API e Banco de Dados](#api-e-banco-de-dados)
-- [Deploy](#deploy)
-
 ## 🎯 Visão Geral
 
 O **FIAP Farms** é uma aplicação web moderna desenvolvida para gestão completa de fazendas e propriedades agrícolas. O sistema oferece:
