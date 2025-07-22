@@ -15,8 +15,6 @@ Um sistema completo de gestão agrícola desenvolvido em Angular com Firebase, o
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [API e Banco de Dados](#api-e-banco-de-dados)
 - [Deploy](#deploy)
-- [Contribuição](#contribuição)
-- [Suporte](#suporte)
 
 ## 🎯 Visão Geral
 
